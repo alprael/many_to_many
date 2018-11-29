@@ -65,6 +65,11 @@ public class ProjectController {
     projectRepository.delete(project);
   }
 
+  @GetMapping("{projectId}/students")
+  public List<Student> listStudents(@PathVariable("projectId") long projectId) {
+    return get(projectId).getStudents();
+  }
+
   @PostMapping(value = "{projectId}/students", consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<Project> postStudent(@PathVariable("projectId") long projectId,
@@ -74,6 +79,19 @@ public class ProjectController {
     student.getProjects().add(project);
     studentRepository.save(student);
     return ResponseEntity.created(project.getHref()).body(project);
+  }
+
+  @DeleteMapping(value = "{projectId}/students/{studentId")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteStudent(@PathVariable("projectId") long projectId,
+      @PathVariable("studentId") long studentId) {
+    Project project = get(projectId);
+    Student student = studentRepository.findById(studentId).get();
+    if (project.getStudents().remove(student)) {
+      projectRepository.save(project);
+    } else {
+      throw new NoSuchElementException();
+    }
   }
 
   @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Resource not found")
